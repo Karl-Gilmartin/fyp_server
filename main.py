@@ -9,13 +9,41 @@ import re
 import json
 import spacy
 import nltk
+from datetime import datetime, timedelta
+import os
+from supabase import create_client, Client
+import time
+import threading
+import dotenv
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+dotenv.load_dotenv()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 Starting up the application...")
+    start_periodic_task()
+    yield
+    print("🛑 Shutting down the application...")
+
+app = FastAPI(lifespan=lifespan)
 
 # Load NLP tools
 nlp = spacy.load("en_core_web_sm")
 nltk.download("stopwords")
 stop_words = set(nltk.corpus.stopwords.words("english"))
+
+
+# Initialize Supabase client
+print("🔌 Initializing Supabase connection...")
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_ANON_KEY")
+
+if not supabase_url or not supabase_key:
+    print("❌ Missing Supabase credentials! Please check your .env file")
+else:
+    supabase: Client = create_client(supabase_url, supabase_key)
+    print("✅ Supabase client initialized")
 
 # Load contractions
 with open("contradictions.json") as f:
@@ -40,6 +68,29 @@ except Exception as e:
 class PredictionRequest(BaseModel):
     text: str
     model_type: Optional[str] = "tflite"  # for future compatibility
+
+def periodic_database_check():
+    while True:
+        print("🔄 Checking the database...")
+        try:
+            check_database()
+        except Exception as e:
+            print(f"❌ Error checking database: {e}")
+        time.sleep(3600)  # Sleep for one hour (3600 seconds)
+
+def start_periodic_task():
+    print("Starting periodic task...")
+    thread = threading.Thread(target=periodic_database_check)
+    thread.daemon = True  # Allow the main Flask app to exit even if the thread is running
+    thread.start()
+
+def check_database():
+    # get all records from the reports table
+    print("📊 Fetching records from reports table...")
+    response = supabase.table("reports").select("*").execute()
+    records = response.data
+    print(f"✅ Found {len(records)} records in the database")
+
 
 @app.get("/")
 async def root():
@@ -129,3 +180,5 @@ def get_bert_embedding(text: str):
 
     return full_vector
 
+if __name__ == '__main__':
+    app.run(debug=True)
