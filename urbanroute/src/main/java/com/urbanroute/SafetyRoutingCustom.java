@@ -100,7 +100,7 @@ public class SafetyRoutingCustom {
         return weights;
     }
 
-    public void calculateRoute(double fromLat, double fromLon, double toLat, double toLon, boolean useSafetyWeights) {
+    public JsonNode calculateRoute(double fromLat, double fromLon, double toLat, double toLon, boolean useSafetyWeights) {
         GHPoint from = new GHPoint(fromLat, fromLon);
         GHPoint to = new GHPoint(toLat, toLon);
 
@@ -142,26 +142,24 @@ public class SafetyRoutingCustom {
 
         GHResponse response = graphHopper.route(request);
         if (response.hasErrors()) {
-            System.out.println("Error calculating route: " + response.getErrors());
-            return;
+            throw new RuntimeException("Error calculating route: " + response.getErrors());
         }
 
         ResponsePath path = response.getBest();
         if (path == null) {
-            System.out.println("No route found!");
-            return;
+            throw new RuntimeException("No route found!");
         }
 
         System.out.println("Route " + (useSafetyWeights ? "with" : "without") + " safety weights:");
         System.out.println("Distance: " + String.format("%.2f", path.getDistance()) + "m");
         System.out.println("Time: " + path.getTime() / 1000 + "s");
 
-        // Save the route to a GeoJSON file
+        // Save the route to a GeoJSON file and return the GeoJSON data
         String filename = "route_" + (useSafetyWeights ? "with" : "without") + "_safety-custom.geojson";
-        saveRouteAsGeoJson(path.getPoints(), filename);
+        return saveRouteAsGeoJson(path.getPoints(), filename);
     }
 
-    private void saveRouteAsGeoJson(PointList points, String filename) {
+    private JsonNode saveRouteAsGeoJson(PointList points, String filename) {
         try {
             ObjectNode featureCollection = objectMapper.createObjectNode();
             featureCollection.put("type", "FeatureCollection");
@@ -191,8 +189,10 @@ public class SafetyRoutingCustom {
             // Write to file
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(filename), featureCollection);
             System.out.println("Route saved to " + filename);
+            
+            return featureCollection;
         } catch (IOException e) {
-            System.err.println("Error saving route to GeoJSON: " + e.getMessage());
+            throw new RuntimeException("Error saving route to GeoJSON: " + e.getMessage());
         }
     }
 
