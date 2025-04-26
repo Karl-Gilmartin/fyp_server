@@ -1,3 +1,10 @@
 venv/
 __pycache__/
 .env
+
+# Ignore GraphHopper data files
+graphhopper-data/
+**/graphhopper-data/
+*.osm.pbf
+**/target/
+.DS_Store

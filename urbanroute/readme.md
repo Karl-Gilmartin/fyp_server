@@ -19,12 +19,10 @@ This project implements safety-based routing using GraphHopper, allowing users t
 
 2. Download the OSM data file:
    ```
-   wget -O ireland.osm.pbf https://download.geofabrik.de/europe/ireland-and-northern-ireland/ireland.osm.pbf
+   wget -O ireland-and-northern-ireland-latest.osm.pbf https://download.geofabrik.de/europe/ireland-and-northern-ireland-latest.osm.pbf
+
    ```
    
-   If you don't have wget installed, you can download the file manually from:
-   https://download.geofabrik.de/europe/ireland-and-northern-ireland/ireland.osm.pbf
-
 3. Build the project:
    ```
    mvn clean install
