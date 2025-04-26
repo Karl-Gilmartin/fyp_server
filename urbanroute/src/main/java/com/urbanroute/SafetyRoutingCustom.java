@@ -74,7 +74,10 @@ public class SafetyRoutingCustom {
     private Map<Long, Double> loadSafetyWeights() {
         Map<Long, Double> weights = new HashMap<>();
         try {
-            JsonNode root = objectMapper.readTree(new File(SAFETY_WEIGHTS_FILE));
+            JsonNode root = objectMapper.readTree(
+                getClass().getClassLoader().getResourceAsStream(SAFETY_WEIGHTS_FILE)
+            );
+            
             JsonNode unsafeWays = root.get("unsafe_ways");
             if (unsafeWays != null && unsafeWays.isArray()) {
                 for (JsonNode way : unsafeWays) {
@@ -108,7 +111,7 @@ public class SafetyRoutingCustom {
             for (Map.Entry<Long, Double> entry : safetyWeights.entrySet()) {
                 long wayId = entry.getKey();
                 double weight = entry.getValue();
-                
+
                 // This needs to be updated / set by the user
                 // Calculate penalty based on weight (higher weight = more unsafe = higher penalty)
                 double penalty = Math.max(0.1, 1.0 - (weight / 50.0)); // minimum speed is 10%
