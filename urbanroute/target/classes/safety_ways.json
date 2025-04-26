@@ -1,0 +1,30 @@
+{
+  "unsafe_ways": [
+    {
+      "way_id": 1288829638,
+      "weight": 25.0,
+      "description": "Very unsafe street"
+    },
+    {
+      "way_id": 556390402,
+      "weight": 15.0,
+      "description": "Quite unsafe street"
+    },
+    {
+      "way_id": 3791747,
+      "weight": 30.0,
+      "description": "Another very unsafe street"
+    },
+    {
+      "way_id": 282571104,
+      "weight": 20.0,
+      "description": "Moderately unsafe street"
+    },
+    {
+      "way_id": 13904648,
+      "weight": 25.0,
+      "description": "Very unsafe street"
+    }
+
+  ]
+}
